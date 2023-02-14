@@ -1,0 +1,56 @@
+---
+- name: installer apt-transport-https
+  become: yes
+  apt:
+    name: apt-transport-https
+    state: present
+
+
+
+
+# - name: Install PHP 7.1 and related packages
+#   become: yes
+#   apt:
+#     name:
+#       - php7.1
+#       - php7.1-cli
+#       - php7.1-mysql
+#       - php7.1-gd
+#       - php7.1-curl
+#     state: present
+
+- name: PHP | ADD ondrej/php repository 
+  apt_repository:
+    repo: "ppa:ondrej/php"
+     
+
+- name: PHP | Install
+  apt: 
+    update_cache: yes
+    name:
+      - "php7.1"
+      - "php-curl"
+      - "php7.1-mbstring"
+      - "php7.1-zip"
+      - "php7.1-xml"
+      # - "php{{ php_version }}-zip" 
+    state: present
+
+
+- name: "PHP  Composer"
+  become: yes
+  shell: 
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    php -r "if (hash_file('sha384', 'composer-setup.php') === '55ce33d7678c5a611085589f1f3ddf8b3c52d662cd01d4ba75c0ee0459970c2200a51f492d557530c71c15d8dba01eae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+    php composer-setup.php
+    php -r "unlink('composer-setup.php');" 
+    mv composer.phar /usr/local/bin/composer     
+  # creates: /usr/local/bin/composer
+
+# - name: "PHP | Disable Errors"
+#   become: yes
+#   lineinfile:
+#     dest: "/etc/php/{{ php_version }}/fpm/php.ini"
+#     regexp: "display_erros = " 
+#     line: "display_erros = 0"
+#   notify: php restart  

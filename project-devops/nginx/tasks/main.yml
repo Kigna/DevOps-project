@@ -1,0 +1,45 @@
+# ---
+# - name: Install Nginx
+#   become: yes
+#   apt:
+#     name: nginx
+#     state: present
+#     update_cache: yes
+#     force_apt_get: yes
+#     install_recommends: no
+   
+
+
+
+# - name: Update and upgrade apt packages
+#   become: yes
+#   apt:
+#     update_cache: yes
+#     upgrade: yes
+
+- name: Install Nginx
+  become: yes
+  apt:
+    update_cache: yes
+    name: nginx
+    state: latest    
+
+- name: Nginx | install
+  become: yes
+  apt: 
+    name: Nginx
+    state: present
+- name: Nginx | Default vhost
+  become: yes
+  template:
+    src: default.j2
+    dest: "/etc/nginx/sites-available/default"
+
+- name: "Nginx | Vhost {{ donmain}}"
+  become: yes
+  template:
+    src: default.j2
+    dest: "/etc/nginx/sites-enabled/{{ domain }}"
+  notify: nginx reload
+
+

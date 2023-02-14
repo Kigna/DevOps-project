@@ -1,0 +1,71 @@
+---
+# install the front
+- name: Installation du serveur
+  hosts: front
+  remote_user: vagrant
+  become: yes
+  tasks:  
+  - name: "USER | creation de {{ user }}"
+    user:
+      name: "{{ user }}"
+      shell: /bin/bash
+  - name: USER | clef SSH  
+    authorized_key:
+      user: "{{ user }}"
+      state: present
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}" 
+
+  # - name: APT | Update & Upgrade
+  #   ansible.builtin.apt:
+  #     upgrade: dist
+  #     update_cache: yes 
+
+  - include_role:
+      name: tools
+
+  - include_role: 
+      name: angular       
+# install the back
+- name: installatins du back
+  hosts: back
+  remote_user: vagrant
+  become: yes
+  tasks:  
+  - include_vars:
+     file: vars.yml
+  - name: "USER | creation de {{ user }}"
+    user:
+      name: "{{ user }}"
+      shell: /bin/bash
+  - name: USER | clef SSH  
+    authorized_key:
+      user: "{{ user }}"
+      state: present
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}" 
+
+  # - include_role: 
+  #     name: nginx
+  # - include_role: 
+  #     name: php      
+
+# install  the db
+- name: installatins du db
+  hosts: db
+  remote_user: vagrant
+  tasks:  
+  - include_vars:
+     file: vars.yml
+  - name: "USER | creation de {{ user }}"
+    become: yes
+    user:
+      name: "{{ user }}"
+      shell: /bin/bash
+  - name: USER | clef SSH 
+    become: yes 
+    authorized_key:
+      user: "{{ user }}"
+      state: present
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"   
+
+  - include_role: 
+      name: mysql      

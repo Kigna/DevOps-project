@@ -1,0 +1,41 @@
+server {
+    listen      80;
+    listen      [::]:80;
+    server_name {{ domain }};
+    
+    root {{ansistrano_deploy_to }}/current/public;
+    index index.php index.html;
+    error_page 404 /index.php
+
+    add_header x-Frame-Options "SAMEORIGIN";
+    add_header x-XSS-Protection "1; mode=block";
+    add_header X-Content-Type-Options "nosniff";
+
+    location / {
+        try_files $uri/ /index.php?query_string;
+    }
+
+    {% if php_version %}
+    location ~ \.php{
+        include snippets/fastcgi-php.comf
+        fastcgi_pass unix:/var/run/php/php{{ php_version }}-fpm.sock;
+
+    }
+    {% endif %}
+
+    location ~ /\.ht{
+        deny all;
+    }
+    location ~ /\.(?!well-known).*{
+        deny all;
+
+
+    }
+
+    location ~* \.(jpg|jpeg|gif|css|png|js|ico|html)${
+        access_log off;
+        expires max;
+    }
+
+    
+}

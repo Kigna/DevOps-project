@@ -1,0 +1,98 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+Vagrant.configure("2") do |config|
+  
+  config.vm.define "back" do |back|
+
+    back.vm.box = "debian/jessie64"
+
+    back.vm.network "private_network", ip: "192.168.56.2"
+
+    back.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 512]
+      v.customize ["modifyvm", :id, "--name", "back"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+
+    end 
+
+    back.vm.provision "shell"  do |s|
+      ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
+      s.inline = <<-SHELL
+        echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
+        echo #{ssh_pub_key} >> /root/.ssh/authorized_keys
+        sudo apt-get install -y python
+      SHELL
+      
+    end
+
+  end
+    
+
+  config.vm.define "front" do |front|
+
+    front.vm.box = "debian/jessie64"
+
+    front.vm.network "private_network", ip: "192.168.56.3"
+
+    front.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 512]
+      v.customize ["modifyvm", :id, "--name", "front"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+    end 
+
+    front.vm.provision "shell" do |s|
+      ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
+      s.inline = <<-SHELL
+        echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
+        echo #{ssh_pub_key} >> /root/.ssh/authorized_keys
+        sudo apt-get install -y python
+        apt-get install -y git wget ansible gnupg2 curl 
+        sed -i 's/.*pipelining.*/pipelining = True/' /etc/ansible/ansible.cfg
+        sed -i 's/.*allow_world_readable_tmpfile.*/allow_world_readable_tmpfiles = /etc/ansible/ansible.cfg '
+        npm install -y -g @angular/cli 
+        npm install -y -g n 
+        n 14.16.1 -y 
+        apt update -y 
+        npm install -y 
+        ng servee -y 
+
+      SHELL
+    # front.vm.provision "shell", path: "install_angular.sh"
+    end  
+    
+  end
+  
+  config.vm.define "db" do |db|
+
+    db.vm.box = "debian/jessie64"
+
+    db.vm.network "private_network", ip: "192.168.56.4"
+
+    db.vm.provider :virtualbox do |v|
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+      v.customize ["modifyvm", :id, "--memory", 512]
+      v.customize ["modifyvm", :id, "--name", "db"]
+      v.customize ["modifyvm", :id, "--cpus", "2"]
+    end  
+
+    db.vm.provision "shell" do |s|
+      ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
+      s.inline = <<-SHELL
+        echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
+        echo #{ssh_pub_key} >> /root/.ssh/authorized_keys
+        sudo apt-get install -y python
+      SHELL
+    end  
+  end  
+
+end
+
+
+

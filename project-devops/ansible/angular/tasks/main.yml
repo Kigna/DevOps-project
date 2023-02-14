@@ -1,0 +1,42 @@
+---
+- name: "Add nodejs apt key"
+  become: yes
+  apt_key:
+    url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+    state: present
+- name: installer apt-transport-https
+  become: yes
+  apt:
+    name: apt-transport-https
+    state: present
+
+- name: "Add nodejs 14.x ppa for apt repo"
+  become: yes
+  apt_repository:
+    repo: "deb https://deb.nodesource.com/node_14.x bionic main"
+    update_cache: yes    
+
+- name: "Install nodejs"
+  become: yes
+  apt:
+    name: nodejs
+    state: present
+
+# - name: Install NodeJS 
+#   become: yes 
+#   apt: 
+#     name: nodejs 
+#     state: present 
+
+# - name: "Install npm"
+#   become: yes 
+#   apt: 
+#     name: npm 
+#     version: 
+#     state: present 
+
+- name: Install Angular CLI
+  npm:
+    name: "@angular/cli"
+    global: yes
+    state: present

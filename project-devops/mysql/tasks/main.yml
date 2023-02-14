@@ -1,0 +1,32 @@
+---
+- name: MySQL | Install
+  become: yes
+  apt:
+    name:
+      - mysql-server
+      - python-mysqldb
+    state: present
+- name: "MysQL | Create Database {{ mysql_db }}"
+  # become: yes
+  # mysql_user:
+  mysql_db:
+    # check_implicit_admin: true
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    db: "{{ mysql_db }}"
+    # user: ""
+    # host: localhost
+    # password: "{{mysql_root_password}}" 
+    state: present   
+
+- name: "MysQL | Create Database {{ mysql_db }}"
+  become: yes
+  mysql_user:
+    # check_implicit_admin: true
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ mysql_db }}"
+    password: "{{ mysql_password }}"
+    host: localhost
+    priv: "{{mysql_db}}.*:ALL" 
+    state: present   
